@@ -2,6 +2,6 @@
 #include"map.hpp"
 
 int main(){
-    map_time();
+    go_to_location();
     return 0;
 }

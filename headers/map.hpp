@@ -3,13 +3,9 @@
 
 #include<ctime>
 #include<string>
-
-struct location{
-    int npc_count;        // количество жителей
-    int enemy_count;      // количество врагов
-    std::string loc_name; // название локации
-    int loc_id;           // id локации
-}
+#include<thread>
+#include<chrono>
+#include<cstdlib>
 
 void map_time(); // время на карте (привязано к времени пользователя)
 void go_to_location(); // перемещение к выбранной локации
