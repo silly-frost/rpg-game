@@ -182,19 +182,24 @@ std::string go_to_location(std::string p_choose){
 
     std::cout << "Отправляемся в локацию \"" << p_choose << "\"!\n";
 
-    if(p_choose == flower_valley || p_choose == oasis || p_choose == broken_village || p_choose == cursed_castle){
-        std::cout << "Время в пути: 3 секунды \n";
-        std::this_thread::sleep_for(std::chrono::seconds(3));
+    int time_in_travel = 0;
+    if (p_choose == "flower_valley" || p_choose == "oasis" || 
+        p_choose == "broken_village" || p_choose == "cursed_castle") {
+        time_in_travel = 3;
+    } else if (p_choose == "desert" || p_choose == "desert_village" || 
+               p_choose == "old_forest" || p_choose == "iron_island" || 
+               p_choose == "snowlands") {
+        time_in_travel = 5;
+    } else if (p_choose == "unnamed_kingdom" || p_choose == "ice_caves" || 
+               p_choose == "home") {
+        time_in_travel = 4;
     }
-    else if(p_choose == desert || p_choose == desert_village || p_choose == old_forest || p_choose == iron_island || p_choose == snowlands){
-        std::cout << "Время в пути: 5 секунд \n";
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-    }
-    else if(p_choose == unnamed_kingdom || p_choose == ice_caves || p_choose == home){
-        std::cout << "Время в пути: 4 секунды \n";
-        std::this_thread::sleep_for(std::chrono::seconds(4));
-    }
-    
+
+    std::cout << "Время в пути: " << travelTime << " секунд \n";
+    std::this_thread::sleep_for(std::chrono::seconds(travelTime));
+    std::cout << "Вы прибыли! \n";
+}
+
     clear_screen();
     
     std::cout << "Вы прибыли! ";
