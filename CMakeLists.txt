@@ -19,3 +19,9 @@ add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_include_directories(${PROJECT_NAME} PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/headers
 )
+
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/map.json"
+    "${CMAKE_CURRENT_BINARY_DIR}/map.json"
+    COPYONLY
+)
