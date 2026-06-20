@@ -4,7 +4,7 @@
 #include<string>
 
 int main(){
-    std::string test = "home";
-    while(true) go_to_location(test);
+    while(true) change_location();
+    
     return 0;
 }
