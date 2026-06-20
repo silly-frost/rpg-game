@@ -6,6 +6,7 @@ cmake_install.cmake
 Makefile
 *.cmake
 
+save.txt
 *.exe
 *.out
 *.app
