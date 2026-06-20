@@ -1,139 +1,70 @@
 #ifndef MAP_CPP
 #define MAP_CPP
 
-#include<string>
-#include"map.hpp"
 #include"utils.hpp"
+#include"map.hpp"
+#include"player.hpp"
+#include"json.hpp"
 #include<iostream>
+#include<fstream>
 
-const std::unordered_map<locationID, Location> world_map = {
-  {locationID::home, {
-      "Дом",
-      "Уютное место, где вам всегда рады.",
-      {
-        {locationID::desert, 3},
-        {locationID::flower_valley, 2}
-      }
-  }},
-  {locationID::desert, {
-      "Пустыня",
-      "Страшная жара и бесконечные пески.",
-      {
-        {locationID::home, 3},
-        {locationID::unnamed_kingdom, 3},
-        {locationID::oasis, 6}
-      }
-  }},
-  {locationID::oasis, {
-      "Оазис",
-      "Помощь Божья для заблудших в бесконечных песках",
-      {
-        {locationID::desert, 6},
-        {locationID::desert_village, 4}
-      }
-  }},
-  {locationID::desert_village, {
-      "Пустынная деревня",
-      "Здесь проживают сломленные духом люди, потерявшие веру в мир.",
-      {
-        {locationID::oasis, 4}
-      }
-  }},
-  {locationID::unnamed_kingdom, {
-      "Безымянное королевство",
-      "Несмотря на расположение в пустыне, король смог создать рай для своих жителей.",
-      {
-        {locationID::desert, 3},
-        {locationID::tavern, 1}
-      }
-  }},
-  {locationID::tavern, {
-      "Таверна",
-      "Дружественная атмосфера и множество выпивки!",
-      {
-        {locationID::unnamed_kingdom, 1}
-      }
-  }},
-  {locationID::flower_valley, {
-      "Цветочная поляна",
-      "Жужжание пчёл и прекрасные виды наполняют вас решимостью.",
-      {
-        {locationID::home, 2},
-        {locationID::oak_forest, 3}
-      }
-  }},
-  {locationID::oak_forest, {
-      "Дубовый лес",
-      "Вокруг вас шумят вековые деревья.",
-      {
-        {locationID::flower_valley, 3},
-        {locationID::dark_forest, 5}
-      }
-  }},
-  {locationID::dark_forest, {
-      "Темный лес",
-      "Старый жуткий лес, в котором легко заблудиться.",
-      {
-        {locationID::oak_forest, 5},
-        {locationID::broken_village, 2},
-        {locationID::snowlands, 6}
-      }
-  }},
-  {locationID::broken_village, {
-      "Разрушенная деревня",
-      "Когда-то здесь было шумно и весело, пока не начался пожар...",
-      {
-        {locationID::dark_forest, 2}
-      }
-  }},
-  {locationID::snowlands, {
-      "Снежные земли",
-      "Холод пробирает вас до костей.",
-      {
-        {locationID::dark_forest, 6},
-        {locationID::ice_caves, 4},
-        {locationID::snow_village, 2}
-      }
-  }},
-  {locationID::snow_village, {
-      "Снежная деревня",
-      "Горящие здесь огни являются путеводной звездой для заблудших в буре.",
-      {
-        {locationID::snowlands, 2},
-        {locationID::seaport, 1}
-      }
-  }},
-  {locationID::ice_caves, {
-      "Ледяные пещеры",
-      "Мрачная, но безопасная пещера. Здесь можно спрятаться от бури.",
-      {
-        {locationID::snowlands, 4}
-      }
-  }},
-  {locationID::seaport, {
-      "Заснеженный порт",
-      "После обнаружения металлического заражения всем запретили покидать материк.",
-      {
-        {locationID::snowlands, 1}, // Исправлено логическое замыкание: порт соединен со snow_village, а snow_village со snowlands. Если порт ведет сразу в snowlands, то время 1 сек.
-        {locationID::iron_island, 10}
-      }
-  }},
-  {locationID::iron_island, {
-      "Железный остров",
-      "Некогда прекрасное место, но однажды всё изменилось...",
-      {
-        {locationID::seaport, 10},
-        {locationID::cursed_castle, 2}
-      }
-  }},
-  {locationID::cursed_castle, {
-      "Проклятый замок",
-      "Здесь началось распространение железного вируса... Никто не выжил...",
-      {
-        {locationID::iron_island, 2}
-      }
-  }}
-};
+std::unordered_map<locationID, Location> world_map;
+using json = nlohmann::json;
+
+locationID string_to_id(const std::string& str) {
+    if (str == "home") return locationID::home;
+    if (str == "desert") return locationID::desert;
+    if (str == "oasis") return locationID::oasis;
+    if (str == "desert_village") return locationID::desert_village;
+    if (str == "unnamed_kingdom") return locationID::unnamed_kingdom;
+    if (str == "tavern") return locationID::tavern;
+    if (str == "flower_valley") return locationID::flower_valley;
+    if (str == "oak_forest") return locationID::oak_forest;
+    if (str == "dark_forest") return locationID::dark_forest;
+    if (str == "broken_village") return locationID::broken_village;
+    if (str == "snowlands") return locationID::snowlands;
+    if (str == "snow_village") return locationID::snow_village;
+    if (str == "ice_caves") return locationID::ice_caves;
+    if (str == "seaport") return locationID::seaport;
+    if (str == "iron_island") return locationID::iron_island;
+    if (str == "cursed_castle") return locationID::cursed_castle;
+    return locationID::home;
+}
+
+bool load_map_from_file(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cout << "[Ошибка] Не удалось открыть файл карты: " << filename << "\n";
+        return false;
+    }
+
+    json map_data;
+    try {
+        file >> map_data;
+    } catch (const json::parse_error& e) {
+        std::cout << "[Ошибка JSON] Ошибка синтаксиса файла: " << e.what() << "\n";
+        return false;
+    }
+
+    for (auto& [key, value] : map_data.items()) {
+        locationID loc_id = string_to_id(key);
+        
+        Location loc;
+        loc.name = value["name"].get<std::string>();
+        loc.description = value["description"].get<std::string>();
+        
+        for (auto& conn_json : value["connections"]) {
+            Connection conn;
+            conn.target = string_to_id(conn_json["target"].get<std::string>());
+            conn.travel_time = conn_json["time"].get<int>();
+            loc.connected_locations.push_back(conn);
+        }
+        
+        world_map[loc_id] = loc;
+    }
+    
+    return true;
+}
 
 void map_time(){
     std::time_t now = std::time(nullptr);
@@ -147,22 +78,23 @@ void map_time(){
     std::cout << "Текущее время на локации: " << buffer << "\n" << std::endl;
 }
 
-
 locationID current_location = locationID::home;
 
 void change_location(){
-  clear_screen();
-  const Location& current = world_map.at(current_location);
+    clear_screen();
+
+    if (world_map.find(current_location) == world_map.end()) {
+        std::cout << "Критическая ошибка: локация не загружена!\n";
+        return;
+    }
+    const Location& current = world_map.at(current_location);
     
-    std::cout << "\nВы находитесь в локации \"" << current.name << "\".\n";
-    std::cout << current.description << "\n\n";
-    std::cout << "Доступные пути:\n";
-    
+    std::cout << "\n--- Доступные пути из локации \"" << current.name << "\" ---\n";
     for (const Connection& conn : current.connected_locations) {
         std::cout << "- " << world_map.at(conn.target).name << "\n";
     }
     
-    std::cout << "\nКуда вы хотите пойти? ";
+    std::cout << "Куда вы хотите пойти? ";
     std::string choice;
     std::getline(std::cin, choice);
     
@@ -172,7 +104,45 @@ void change_location(){
         
         if (next_loc.name == choice) {
             clear_screen();
-            std::cout << "Вы отправляетесь в локацию \"" << next_loc.name << "\".\n";
+            
+            if (current_location == locationID::desert) {
+                    if (player.has_flag("jafar_raid_ready") && !player.has_flag("jafar_raid_complete")) {
+                    std::cout << "\n[!] Как только вы ступаете на барханы Пустыни, из-за песчаной бури вылетают разбойники!\n";
+                    std::cout << "Главарь кочевников обнажает кривой ятаган и бросается на вас!\n";
+                    
+                    wait_for_player();                    
+                    Monster bandit = {"Главарь Кочевников", 110, 22, 70};                     
+                    if (start_battle(bandit)) { 
+                        player.story_flags.push_back("jafar_raid_complete");
+                        std::cout << "\n[Система] Вы одолели главаря. Наводка Джафара успешно отработана!\n";
+                    }
+                }
+            }
+            if (current_location == locationID::iron_island) {
+                if (!player.has_flag("world_saved")) {
+                    std::cout << "\n[!] Воздух Железного острова отравлен! Железный вирус наносит вам 10 HP.\n";
+                    player.health -= 10;
+                    if (player.health < 0) player.health = 0;
+                } else {
+                    std::cout << "\nВокруг цветут молодые деревья. Металлический вирус полностью исчез из этих мест!\n";
+                }
+            }
+            else if (current_location == locationID::cursed_castle) {
+                if (!player.has_flag("world_saved")) {
+                    std::cout << "\n[!] Вы вошли в эпицентр заражения! Железный вирус яростно разъедает тело! Вы теряете 50 HP.\n";
+                    player.health -= 50; 
+                    if (player.health < 0) player.health = 0;
+                } else {
+                    std::cout << "\nБагровый туман рассеялся. Проклятый замок теперь безопасен, а стальное ядро уничтожено.\n";
+                }
+            }
+            else if (current_location == locationID::oasis) {
+                std::cout << "\n[+] Прохладная вода оазиса восстанавливает вам 15 HP!\n";
+                player.health += 15;
+                if (player.max_health > 200) player.max_health = 200;
+                if (player.health > player.max_health) player.health = player.max_health;
+            }
+            std::cout << "Вы отправляетесь в локацию \"" << next_loc.name << "\"\n";
             std::cout << "Путь займет " << conn.travel_time << " сек.\n\nВ пути";
             std::cout << std::flush;
             
@@ -180,21 +150,21 @@ void change_location(){
                 std::this_thread::sleep_for(std::chrono::seconds(1));
                 std::cout << " ." << std::flush;
             }
-
             clear_screen();
             std::cout << "\nВы прибыли!\n";
             map_time();
 
             current_location = conn.target;
-            moved = true;
+            moved = true;         
             break;
         }
     }
-  
+
+
   if(!moved){ 
       clear_screen();
-      std::cout << "Название указано неверно." << "\n";
-      time_stop(3);
+      std::cout << "Название локации указано неверно." << "\n";
+      time_stop(2);
       clear_screen();
   }
 }

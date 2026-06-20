@@ -1,11 +1,12 @@
 #ifndef MAP_HPP
 #define MAP_HPP
 
+#include<string>
+#include<vector>
 #include<ctime>
 #include<thread>
 #include<chrono>
 #include<unordered_map>
-#include<vector>
 
 inline void time_stop(int seconds) {
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
@@ -48,10 +49,11 @@ struct Location {
   std::vector<Connection> connected_locations;
 };
 
-extern const std::unordered_map<locationID, Location> world_map;
+extern std::unordered_map<locationID, Location> world_map;
 extern locationID current_location;
 
 void map_time();
+bool load_map_from_file(const std::string& filename);
 void change_location();
 
 #endif
