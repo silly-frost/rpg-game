@@ -1,0 +1,128 @@
+{
+  "home": {
+    "name": "Дом",
+    "description": "Уютное место, где вам всегда рады.",
+    "connections": [
+      {"target": "desert", "time": 3},
+      {"target": "flower_valley", "time": 2}
+    ]
+  },
+  "desert": {
+    "name": "Пустыня",
+    "description": "Страшная жара и бесконечные пески.",
+    "connections": [
+      {"target": "home", "time": 3},
+      {"target": "unnamed_kingdom", "time": 3},
+      {"target": "oasis", "time": 6}
+    ]
+  },
+  "oasis": {
+    "name": "Оазис",
+    "description": "Помощь Божья для заблудших в бесконечных песках",
+    "connections": [
+      {"target": "desert", "time": 6},
+      {"target": "desert_village", "time": 4}
+    ]
+  },
+  "desert_village": {
+    "name": "Пустынная деревня",
+    "description": "Здесь проживают сломленные духом люди, потерявшие веру в мир.",
+    "connections": [
+      {"target": "oasis", "time": 4}
+    ]
+  },
+  "unnamed_kingdom": {
+    "name": "Безымянное королевство",
+    "description": "Несмотря на расположение в пустыне, король смог создать рай для своих жителей.",
+    "connections": [
+      {"target": "desert", "time": 3},
+      {"target": "tavern", "time": 1}
+    ]
+  },
+  "tavern": {
+    "name": "Таверна",
+    "description": "Дружественная атмосфера и множество выпивки!",
+    "connections": [
+      {"target": "unnamed_kingdom", "time": 1}
+    ]
+  },
+  "flower_valley": {
+    "name": "Цветочная поляна",
+    "description": "Жужжание пчёл и прекрасные виды наполняют вас решимостью.",
+    "connections": [
+      {"target": "home", "time": 2},
+      {"target": "oak_forest", "time": 3}
+    ]
+  },
+  "oak_forest": {
+    "name": "Дубовый лес",
+    "description": "Вокруг вас шумят вековые деревья.",
+    "connections": [
+      {"target": "flower_valley", "time": 3},
+      {"target": "dark_forest", "time": 5}
+    ]
+  },
+  "dark_forest": {
+    "name": "Темный лес",
+    "description": "Старый жуткий лес, в котором легко заблудиться.",
+    "connections": [
+      {"target": "oak_forest", "time": 5},
+      {"target": "broken_village", "time": 2},
+      {"target": "snowlands", "time": 6}
+    ]
+  },
+  "broken_village": {
+    "name": "Разрушенная деревня",
+    "description": "Когда-то здесь было шумно и весело, пока не начался пожар...",
+    "connections": [
+      {"target": "dark_forest", "time": 2}
+    ]
+  },
+  "snowlands": {
+    "name": "Снежные земли",
+    "description": "Холод пробирает вас до костей.",
+    "connections": [
+      {"target": "dark_forest", "time": 6},
+      {"target": "ice_caves", "time": 4},
+      {"target": "snow_village", "time": 2}
+    ]
+  },
+  "snow_village": {
+    "name": "Снежная деревня",
+    "description": "Горящие здесь огни являются путеводной звездой для заблудших в буре.",
+    "connections": [
+      {"target": "snowlands", "time": 2},
+      {"target": "seaport", "time": 1}
+    ]
+  },
+  "ice_caves": {
+    "name": "Ледяные пещеры",
+    "description": "Мрачная, но безопасная пещера. Здесь можно спрятаться от бури.",
+    "connections": [
+      {"target": "snowlands", "time": 4}
+    ]
+  },
+  "seaport": {
+    "name": "Заснеженный порт",
+    "description": "После обнаружения металлического заражения люди перестали покидать материк.",
+    "connections": [
+      {"target": "snow_village", "time": 1},
+      {"target": "iron_island", "time": 10}
+    ]
+  },
+  "iron_island": {
+    "name": "Железный остров",
+    "description": "Некогда прекрасное место, но однажды всё изменилось...",
+    "connections": [
+      {"target": "seaport", "time": 10},
+      {"target": "cursed_castle", "time": 2}
+    ]
+  },
+  "cursed_castle": {
+    "name": "Проклятый замок",
+    "description": "Здесь началось распространение железного вируса... Никто не выжил...",
+    "connections": [
+      {"target": "iron_island", "time": 2}
+    ]
+  }
+}
