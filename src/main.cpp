@@ -18,7 +18,7 @@ void game_menu() {
 
         const Location& current = world_map.at(current_location);
 
-        std::cout << "\nЛокация: \"" << current.name << "\"\n";
+        std::cout << "\nЛокация: \"" << current.name << "\"\n\n";
         std::cout << "Что вы хотите сделать?\n";
         std::cout << "1. Отправиться в путь (Сменить локацию)\n";
         std::cout << "2. Посмотреть своё состояние (Статы/инвентарь)\n";
@@ -43,14 +43,19 @@ void game_menu() {
             case 2:
                 clear_screen();
                 show_player_status();
+                wait_for_player();
+                clear_screen();
                 break;
             case 3:
                 clear_screen();
                 std::cout << "\n" << current.description << "\n";
+                wait_for_player();
+                clear_screen();
                 break;
             case 4:
                 clear_screen();
                 interact_with_npcs();
+                clear_screen();
                 break;
             case 5:
                 save_game();
@@ -77,6 +82,16 @@ int main() {
     }
     if (!load_game()) {
         std::cout << "[Система] Файл сохранения не найден. Начата новая игра.\n";
+        time_stop(1);
+        std::cout << "[???]: Приветствую тебя, странник. Рад, что ты наконец добрался.\n";
+        time_stop(2);
+        std::cout << "[???]: Этот мир застыл в хаосе, ожидая того, кто сдвинет его с мертвой точки. \n";
+        time_stop(2);
+        std::cout << "[???]: Каждое твое слово, каждый шаг и каждый выбор отныне будут менять эту вселенную.\n\n";
+        time_stop(2);
+        std::cout << "[???]: Поговори с гидом. Он сможет рассказать тебе почти всё об этом мире.\n\n";
+        wait_for_player();
+        clear_screen();
     }
 
     if (player.has_flag("world_saved")) {
