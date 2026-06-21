@@ -55,7 +55,7 @@ inline bool start_battle(Monster enemy) {
             std::vector<size_t> potion_indices;
             for (size_t i = 0; i < player.inventory.size(); ++i) {
                 std::string item = player.inventory[i];
-                if (item == "Настойка_трав" || item == "Пиво" || item == "Медовуха" || item == "Крепкий_Эль" || item == "Вино") {
+                if (item == "Таинственное_Зелье" || item == "Пиво" || item == "Медовуха" || item == "Крепкий_Эль" || item == "Вино") {
                     potion_indices.push_back(i);
                 }
             }
@@ -88,7 +88,7 @@ inline bool start_battle(Monster enemy) {
             }
 
             // 3. Применяем эффект лечения
-            if (chosen_potion == "Таинственное зелье") {
+            if (chosen_potion == "Таинственное_зелье") {
                 player.health += 60;
                 player.damage += 10;
                 std::cout << "\n[+] В спешке боя вы выпиваете Настойку трав и восстанавливаете 50 HP!\n";
@@ -100,6 +100,10 @@ inline bool start_battle(Monster enemy) {
             else if(chosen_potion == "Медовуха"){
                 player.health += 40;
                 std::cout << "\n[+] Вы с удоволствием выпиваете Медовуху, несмотря на битву, и восстанавливаете 40 HP!\n";
+            }
+            else if(chosen_potion == "Крепкий_Эль"){
+                player.health += 50;
+                std::cout << "\n[+] Вы залпом выпиваете Крепкий Эль, прожигая горло, и восстанавливаете 50 HP!\n";
             }
             else if(chosen_potion == "Вино"){
                 player.health += 60;
