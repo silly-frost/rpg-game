@@ -43,9 +43,10 @@ struct Connection {
 };
 
 struct Location {
-  std::string name;
-  std::string description;
-  std::vector<Connection> connected_locations;
+    std::string id;
+    std::string name;
+    std::string description;
+    std::vector<Connection> connected_locations;
 };
 
 extern std::unordered_map<locationID, Location> world_map;

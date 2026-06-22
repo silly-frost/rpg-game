@@ -8,6 +8,9 @@
 #include <vector>
 #include <string>
 
+extern locationID current_location;
+extern std::unordered_map<locationID, Location> world_map;
+
 void talk_to_olden() {
     if (player.has_flag("world_saved")) {
             std::cout << "\n[Олден]: Слава спасителю! Свитки не врут — ты совершил величайший подвиг в истории. \n[Олден]: Металлический вирус отступает, туманы рассеиваются. Наш мир спасен благодаря тебе, " << player.name << "!\n";
@@ -543,71 +546,125 @@ void bossfight_malakar() {
 }
 
 // Главная функция-менеджер
-void interact_with_npcs() {
-    std::vector<std::string> local_npcs;
 
-    if (current_location == locationID::home) local_npcs.push_back("Гид Олден");
-    else if (current_location == locationID::dark_forest) {
+void interact_with_npcs() {
+    std::vector<std::string> local_npcs;    
+    std::string current_id = world_map.at(current_location).id;
+
+    if (current_id == "home") {
+        local_npcs.push_back("Гид Олден");
+    }
+    else if (current_id == "dark_forest") {
         local_npcs.push_back("Шаман Раду");
         local_npcs.push_back("Дух Лешего");
         local_npcs.push_back("Старый Охотник Грей (Заработок)");
     }
-    else if (current_location == locationID::ice_caves) local_npcs.push_back("Странник Илай");
-    else if (current_location == locationID::snow_village) {
-        if (player.has_flag("talked_to_stranger")) local_npcs.push_back("Однорукий старик Бернард");
+    else if (current_id == "ice_caves") {
+        local_npcs.push_back("Странник Илай");
+    }
+    else if (current_id == "snow_village") {
+        if (player.has_flag("talked_to_stranger")) {
+            local_npcs.push_back("Однорукий старик Бернард");
+        }
         local_npcs.push_back("Алхимик Мира");
     }
-    else if (current_location == locationID::unnamed_kingdom) {
+    else if (current_id == "unnamed_kingdom") {
         local_npcs.push_back("Король Эдриан");
         local_npcs.push_back("Стражник Томас");
-        if (player.has_flag("talked_to_guard")) local_npcs.push_back("Оружейник Гром");
+        if (player.has_flag("talked_to_guard")) {
+            local_npcs.push_back("Оружейник Гром");
+        }
     }
-    else if (current_location == locationID::desert_village) {
+    else if (current_id == "desert_village") {
         local_npcs.push_back("Изгнанник Карим");
-        if (player.has_flag("talked_to_citizen")) local_npcs.push_back("Разбойник Джафар");
+        if (player.has_flag("talked_to_citizen")) {
+            local_npcs.push_back("Разбойник Джафар");
+        }
     }
-    else if (current_location == locationID::tavern) {
+    else if (current_id == "tavern") {
         local_npcs.push_back("Трактирщик Гарри (Бар)");
         local_npcs.push_back("Пьяная компания в углу");
     }
-    else if (current_location == locationID::seaport) {
+    else if (current_id == "seaport") {
         local_npcs.push_back("Бригадир портовых доков (Заработок)");
     }
-    else if (current_location == locationID::cursed_castle) {
+    else if (current_id == "cursed_castle") {
         local_npcs.push_back("Безумный маг Малакар (БОСС)");
     }
-    else if (current_location == locationID::iron_island) {
+    else if (current_id == "iron_island") {
         local_npcs.push_back("Кристалл живого металла (Добыча)");
     }
 
+    // Если в локации никого нет
     if (local_npcs.empty()) {
         std::cout << "\nВ этой локации сейчас никого нет.\n";
         wait_for_player();
         return;
     }
 
-    // вывод меню выбора NPC
+    // Вывод меню выбора NPC
+    std::cout << "\nПеред вами люди и существа. С кем вы хотите заговорить?\n";
+    for (size_t i = 0; i < local_npcs.size(); ++i) {
+        std::cout << i + 1 << ". " << local_npcs[i] << "\n";
+    }
+    std::cout << "0. Назад\nВаш выбор: ";
     int npc_choice; std::cin >> npc_choice; std::cin.ignore(1, '\n');
+
     if (npc_choice <= 0 || npc_choice > (int)local_npcs.size()) return;
     std::string chosen_npc = local_npcs[npc_choice - 1];
+
     clear_screen();
-    
-    // Первый этап
-    if (chosen_npc == "Гид Олден") talk_to_olden();
-    else if (chosen_npc == "Трактирщик Гарри (Бар)") talk_to_harry();
-    else if (chosen_npc == "Оружейник Гром") talk_to_grom();
-    else if (chosen_npc == "Алхимик Мира") talk_to_mira();
-    else if (chosen_npc == "Старый Охотник Грей (Заработок)") talk_to_gray();
-    else if (chosen_npc == "Бригадир портовых доков (Заработок)") talk_to_foreman();
-    else if (chosen_npc == "Шаман Раду") talk_to_shaman();
-    else if (chosen_npc == "Дух Лешего") talk_to_leshiy();
-    else if (chosen_npc == "Странник Илай") talk_to_ilay();
-    else if (chosen_npc == "Однорукий старик Бернард") talk_to_bernard();
-    else if (chosen_npc == "Король Эдриан") talk_to_desert_king();
-    else if (chosen_npc == "Стражник Томас") talk_to_guard();
-    else if (chosen_npc == "Изгнанник Карим") talk_to_karim();
-    else if (chosen_npc == "Разбойник Джафар") talk_to_jafar();
-    else if (chosen_npc == "Пьяная компания в углу") talk_to_drunkards();
-    else if (chosen_npc == "Кристалл живого металла (Добыча)") mine_crystall();
-    else if (chosen_npc == "Безумный маг Малакар (БОСС)") bossfight_malakar();
+
+    if (chosen_npc == "Гид Олден") {
+        talk_to_olden();
+    }
+    else if (chosen_npc == "Трактирщик Гарри (Бар)") {
+        talk_to_harry();
+    }
+    else if (chosen_npc == "Оружейник Гром") {
+        talk_to_grom();
+    }
+    else if (chosen_npc == "Алхимик Мира") {
+        talk_to_mira();
+    }
+    else if (chosen_npc == "Старый Охотник Грей (Заработок)") {
+        talk_to_gray(); 
+    }
+    else if (chosen_npc == "Бригадир портовых доков (Заработок)") {
+        talk_to_foreman();
+    }
+    else if (chosen_npc == "Шаман Раду") { 
+        talk_to_shaman(); 
+    }
+    else if (chosen_npc == "Дух Лешего") {
+        talk_to_leshiy();
+    }
+    else if (chosen_npc == "Странник Илай") {
+        talk_to_ilay();
+    }
+    else if (chosen_npc == "Однорукий старик Бернард") {
+        talk_to_bernard();
+    }
+    else if (chosen_npc == "Король Эдриан") {
+        talk_to_desert_king();
+    }
+    else if (chosen_npc == "Стражник Томас") {
+        talk_to_guard(); 
+    }
+    else if (chosen_npc == "Изгнанник Карим") {
+        talk_to_karim();
+    }
+    else if (chosen_npc == "Разбойник Джафар") {
+        talk_to_jafar();
+    }
+    else if (chosen_npc == "Пьяная компания в углу") {
+        talk_to_drunkards(); 
+    }
+    else if (chosen_npc == "Кристалл живого металла (Добыча)") {
+        mine_crystall();
+    }
+    else if (chosen_npc == "Безумный маг Малакар (БОСС)") { 
+        bossfight_malakar();
+    }
 }
+

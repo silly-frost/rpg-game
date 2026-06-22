@@ -47,6 +47,7 @@ bool load_map_from_file(const std::string& filename) {
         locationID loc_id = string_to_id(key);
         
         Location loc;
+        loc.id = key;
         loc.name = value["name"].get<std::string>();
         loc.description = value["description"].get<std::string>();
         
