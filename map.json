@@ -9,11 +9,43 @@
   },
   "desert": {
     "name": "Пустыня",
-    "description": "Страшная жара и бесконечные пески.",
+    "description": "Страшная жара и бесконечные пески. На горизонте виднеются Солнечные степи.",
     "connections": [
       {"target": "home", "time": 3},
       {"target": "unnamed_kingdom", "time": 3},
-      {"target": "oasis", "time": 6}
+      {"target": "oasis", "time": 6},
+      {"target": "sunny_steppes", "time": 8}
+    ]
+  },
+  "sunny_steppes": {
+    "name": "Солнечные степи",
+    "description": "Бескрайние, выжженные солнцем луга. Отсюда дороги ведут в Забытый бастион и Гнилую топь.",
+    "connections": [
+      {"target": "desert", "time": 8},
+      {"target": "forgotten_bastion", "time": 4},
+      {"target": "rotten_swamp", "time": 5}
+    ]
+  },
+  "forgotten_bastion": {
+    "name": "Забытый бастион",
+    "description": "Полуразрушенная древняя крепость. Крутая винтовая лестница ведет наверх, к Древней обсерватории.",
+    "connections": [
+      {"target": "sunny_steppes", "time": 4},
+      {"target": "ancient_observatory", "time": 3}
+    ]
+  },
+  "ancient_observatory": {
+    "name": "Древняя обсерватория",
+    "description": "Разрушенный купол башни, устремленный в звездное небо. Здесь пахнет озоном и старыми свитками.",
+    "connections": [
+      {"target": "forgotten_bastion", "time": 3}
+    ]
+  },
+  "rotten_swamp": {
+    "name": "Гнилая топь",
+    "description": "Мрачное болото, покрытое ядовитым зеленым туманом. Воздух пахнет гнилью.",
+    "connections": [
+      {"target": "sunny_steppes", "time": 5}
     ]
   },
   "oasis": {
@@ -123,6 +155,13 @@
     "description": "Здесь началось распространение железного вируса... Никто не выжил...",
     "connections": [
       {"target": "iron_island", "time": 2}
+    ]
+  },
+    "black_rocks_island": {
+    "name": "Остров Чёрных Скал",
+    "description": "Мрачные, уходящие в грозовое небо острые скалы. Когда-то здесь обучали стражу проклятого замка.",
+    "connections": [
+      {"target": "seaport", "time": 15}
     ]
   }
 }

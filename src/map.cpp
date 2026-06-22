@@ -11,6 +11,10 @@ using json = nlohmann::json;
 locationID string_to_id(const std::string& str) {
     if (str == "home") return locationID::home;
     if (str == "desert") return locationID::desert;
+    if (str == "sunny_steppes") return locationID::sunny_steppes;
+    if (str == "forgotten_bastion") return locationID::forgotten_bastion;
+    if (str == "ancient_observatory") return locationID::ancient_observatory;
+    if (str == "rotten_swamp") return locationID::rotten_swamp;
     if (str == "oasis") return locationID::oasis;
     if (str == "desert_village") return locationID::desert_village;
     if (str == "unnamed_kingdom") return locationID::unnamed_kingdom;
@@ -25,6 +29,7 @@ locationID string_to_id(const std::string& str) {
     if (str == "seaport") return locationID::seaport;
     if (str == "iron_island") return locationID::iron_island;
     if (str == "cursed_castle") return locationID::cursed_castle;
+    if (str == "forgotten_rocks_island") return locationID::forgotten_rocks_island;
     return locationID::home;
 }
 
@@ -146,6 +151,15 @@ void change_location(){
                 player.health += 15;
                 if (player.health > player.max_health) player.health = player.max_health;
             }
+            else if (conn.target == locationID::forgotten_rocks_island) {
+                if (!player.has_flag("aurelius_quest_started")) {
+                    std::cout << "\n[Система] Вы не можете отправиться туда. Бригадир портовых доков отказывается выделять шхуну на этот опасный остров без веской причины.\n";
+                    wait_for_player();
+                    return; 
+                }
+            }
+
+
             if (!player.is_alive()) {
                 std::cout << "\n[!] Заражение оказалось смертельным... Вы упали без сил, не успев сделать и шага.\n";
                 wait_for_player();

@@ -35,6 +35,13 @@ enum class locationID {
   // Проклятые земли
   iron_island,
   cursed_castle,
+  forgotten_rocks_island,
+
+  // Степи
+  sunny_steppes,
+  forgotten_bastion,
+  ancient_observatory,
+  rotten_swamp
 };
 
 struct Connection {
