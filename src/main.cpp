@@ -58,6 +58,7 @@ void game_menu() {
                 clear_screen();
                 break;
             case 5:
+                clear_screen();
                 save_game();
                 std::cout << "\nСпасибо за игру! До встречи.\n";
                 exit(0);
