@@ -1,6 +1,3 @@
-#ifndef MAP_CPP
-#define MAP_CPP
-
 #include"utils.hpp"
 #include"map.hpp"
 #include"player.hpp"
@@ -85,6 +82,7 @@ void map_time(){
 
 locationID current_location = locationID::home;
 
+
 void change_location(){
     clear_screen();
 
@@ -109,9 +107,8 @@ void change_location(){
         
         if (next_loc.name == choice) {
             clear_screen();
-            
-            if (current_location == locationID::desert) {
-                    if (player.has_flag("jafar_raid_ready") && !player.has_flag("jafar_raid_complete")) {
+            if (conn.target == locationID::desert) {
+                if (player.has_flag("jafar_raid_ready") && !player.has_flag("jafar_raid_complete")) {
                     std::cout << "\n[!] Как только вы ступаете на барханы Пустыни, из-за песчаной бури вылетают разбойники!\n";
                     std::cout << "Главарь кочевников обнажает кривой ятаган и бросается на вас!\n";
                     
@@ -120,10 +117,12 @@ void change_location(){
                     if (start_battle(bandit)) { 
                         player.story_flags.push_back("jafar_raid_complete");
                         std::cout << "\n[Система] Вы одолели главаря. Наводка Джафара успешно отработана!\n";
+                    } else {
+                        return;
                     }
                 }
             }
-            if (current_location == locationID::iron_island) {
+            else if (conn.target == locationID::iron_island) {
                 if (!player.has_flag("world_saved")) {
                     std::cout << "\n[!] Воздух Железного острова отравлен! Железный вирус наносит вам 10 HP.\n";
                     player.health -= 10;
@@ -132,7 +131,7 @@ void change_location(){
                     std::cout << "\nВокруг цветут молодые деревья. Металлический вирус полностью исчез из этих мест!\n";
                 }
             }
-            else if (current_location == locationID::cursed_castle) {
+            else if (conn.target == locationID::cursed_castle) {
                 if (!player.has_flag("world_saved")) {
                     std::cout << "\n[!] Вы вошли в эпицентр заражения! Железный вирус яростно разъедает тело! Вы теряете 50 HP.\n";
                     player.health -= 50; 
@@ -141,12 +140,18 @@ void change_location(){
                     std::cout << "\nБагровый туман рассеялся. Проклятый замок теперь безопасен, а стальное ядро уничтожено.\n";
                 }
             }
-            else if (current_location == locationID::oasis) {
+            else if (conn.target == locationID::oasis) {
                 std::cout << "\n[+] Прохладная вода оазиса восстанавливает вам 15 HP!\n";
                 player.health += 15;
-                if (player.max_health > 200) player.max_health = 200;
                 if (player.health > player.max_health) player.health = player.max_health;
             }
+            if (!player.is_alive()) {
+                std::cout << "\n[!] Заражение оказалось смертельным... Вы упали без сил, не успев сделать и шага.\n";
+                wait_for_player();
+                respawn_player();
+                return;
+            }
+
             std::cout << "Вы отправляетесь в локацию \"" << next_loc.name << "\"\n";
             std::cout << "Путь займет " << conn.travel_time << " сек.\n\nВ пути";
             std::cout << std::flush;
@@ -165,13 +170,10 @@ void change_location(){
         }
     }
 
-
-  if(!moved){ 
-      clear_screen();
-      std::cout << "Название локации указано неверно." << "\n";
-      time_stop(2);
-      clear_screen();
-  }
+    if(!moved){ 
+        clear_screen();
+        std::cout << "Название локации указано неверно." << "\n";
+        time_stop(2);
+        clear_screen();
+    }
 }
-
-#endif

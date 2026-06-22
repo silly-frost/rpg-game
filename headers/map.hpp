@@ -1,5 +1,4 @@
-#ifndef MAP_HPP
-#define MAP_HPP
+#pragma once
 
 #include<string>
 #include<vector>
@@ -55,5 +54,3 @@ extern locationID current_location;
 void map_time();
 bool load_map_from_file(const std::string& filename);
 void change_location();
-
-#endif
