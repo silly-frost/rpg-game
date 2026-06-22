@@ -1,5 +1,4 @@
-#ifndef PLAYER_HPP
-#define PLAYER_HPP
+#pragma once
 
 #include<string>
 #include<vector>
@@ -32,5 +31,3 @@ void show_player_status();
 void save_game();
 bool load_game();
 void respawn_player();
-
-#endif

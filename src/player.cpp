@@ -1,6 +1,3 @@
-#ifndef PLAYER_CPP
-#define PLAYER_CPP
-
 #include"map.hpp"
 #include"player.hpp"
 #include<cstdlib>
@@ -94,19 +91,64 @@ void show_player_status() {
                 item_used = true;
             }
         }
-        else if (chosen_item == "Пиво" || chosen_item == "Медовуха" || chosen_item == "Крепкий_Эль" || chosen_item == "Вино") {
+        else if (chosen_item == "Таинственное_Зелье") { 
+            if (player.health == player.max_health) {
+                std::cout << "\n[Система] У вас и так полное здоровье! Использовать зелье ради урона в мирной зоне не имеет смысла.\n";
+            } 
+            else {
+                player.health += 60;
+                player.damage += 10;
+                if (player.health > player.max_health) player.health = player.max_health;
+                std::cout << "\n[+] Вы выпиваете Таинственное зелье, восстанавливаете 60 HP и навсегда увеличиваете урон на 10!\n";
+                item_used = true;
+            }
+        }
+        else if (chosen_item == "Пиво") {
             if (player.health == player.max_health) {
                 std::cout << "\n[Система] Вы не хотите переводить ценную выпивку при полном здоровье.\n";
             } 
             else {
-                player.health += 10;
-                if (player.health < player.max_health) player.health = player.max_health;
-                std::cout << "\n[+] Вы осушили кружку. Спирт согревает изнутри. Восстановлено 5 HP!\n";
+                player.health += 20; 
+                if (player.health > player.max_health) player.health = player.max_health;
+                std::cout << "\n[+] Торопясь, вы выпиваете Пиво и восстанавливаете 20 HP!\n";
+                item_used = true;
+            }
+        }
+        else if (chosen_item == "Медовуха") {
+            if (player.health == player.max_health) {
+                std::cout << "\n[Система] Вы не хотите переводить ценную выпивку при полном здоровье.\n";
+            } 
+            else {
+                player.health += 40; 
+                if (player.health > player.max_health) player.health = player.max_health;
+                std::cout << "\n[+] Вы с удовольствием выпиваете Медовуху и восстанавливаете 40 HP!\n";
+                item_used = true;
+            }
+        }
+        else if (chosen_item == "Крепкий_Эль") {
+            if (player.health == player.max_health) {
+                std::cout << "\n[Система] Вы не хотите переводить ценную выпивку при полном здоровье.\n";
+            } 
+            else {
+                player.health += 50;
+                if (player.health > player.max_health) player.health = player.max_health;
+                std::cout << "\n[+] Вы залпом выпиваете Крепкий Эль, прожигая горло, и восстанавливаете 50 HP!\n";
+                item_used = true;
+            }
+        }
+        else if (chosen_item == "Вино") {
+            if (player.health == player.max_health) {
+                std::cout << "\n[Система] Вы не хотите переводить ценную выпивку при полном здоровье.\n";
+            } 
+            else {
+                player.health += 60; 
+                if (player.health > player.max_health) player.health = player.max_health;
+                std::cout << "\n[+] Вы изящно выпиваете Вино и восстанавливаете себе 60 HP!\n";
                 item_used = true;
             }
         }
         else {
-            // Защита от использования квестовых предметов или оружия
+            // Защита от использования оружия, квестов или брони через сумку
             std::cout << "\n[Система] Предмет [" << chosen_item << "] нельзя использовать таким образом!\n";
         }
 
@@ -119,6 +161,7 @@ void show_player_status() {
         std::this_thread::sleep_for(std::chrono::seconds(2));  
     }
 }
+
 
 
 void save_game() {
@@ -145,7 +188,6 @@ void save_game() {
     else if (current_location == locationID::iron_island) loc_str = "iron_island";
     else if (current_location == locationID::cursed_castle) loc_str = "cursed_castle";
 
-    
     file << loc_str << "\n";
     file << player.health << "\n";
     file << player.max_health << "\n";
@@ -154,17 +196,27 @@ void save_game() {
     file << player.damage << "\n";
     file << player.weapon_name << "\n"; 
 
-    for (size_t i = 0; i < player.inventory.size(); ++i) {
-        file << player.inventory[i] << (i + 1 == player.inventory.size() ? "" : " ");
+    if (player.inventory.empty()) {
+        file << "NONE_ITEMS";
+    } else {
+        for (size_t i = 0; i < player.inventory.size(); ++i) {
+            file << player.inventory[i] << (i + 1 == player.inventory.size() ? "" : " ");
+        }
     }
     file << "\n"; 
-    for (size_t i = 0; i < player.story_flags.size(); ++i) {
-        file << player.story_flags[i] << (i + 1 == player.story_flags.size() ? "" : " ");
+
+    if (player.story_flags.empty()) {
+        file << "NONE_ITEMS";
+    } else {
+        for (size_t i = 0; i < player.story_flags.size(); ++i) {
+            file << player.story_flags[i] << (i + 1 == player.story_flags.size() ? "" : " ");
+        }
     }
     file << "\n";
 
     std::cout << "[Система] Игра успешно сохранена!\n";
 }
+
 
 
 
@@ -179,6 +231,8 @@ bool load_game() {
     current_location = string_to_id(loc_str);
 
     file >> player.health >> player.max_health >> player.gold >> player.armor >> player.damage >> player.weapon_name;
+    
+    // Очищаем поток от оставшихся пробелов и переносов строк перед getline
     file >> std::ws;
  
     if (player.max_health > 200) {
@@ -189,22 +243,26 @@ bool load_game() {
         player.health = player.max_health;
     }
  
+    // Читаем инвентарь
     std::string inv_line;
     std::getline(file, inv_line);
     player.inventory.clear();
-    if (!inv_line.empty()) {
-        std::stringstream ss(inv_line); std::string item;
+    if (!inv_line.empty() && inv_line != "NONE_ITEMS") {
+        std::stringstream ss(inv_line); 
+        std::string item;
         while (ss >> item) player.inventory.push_back(item);
     }
 
-    // Читаем сюжетные флаги
+    // Читаем сюжетные флаги 
     std::string flags_line;
     std::getline(file, flags_line);
     player.story_flags.clear();
-    if (!flags_line.empty()) {
-        std::stringstream ss(flags_line); std::string flag;
+    if (!flags_line.empty() && flags_line != "NONE_ITEMS") {
+        std::stringstream ss(flags_line); 
+        std::string flag;
         while (ss >> flag) player.story_flags.push_back(flag);
     }
+    
     return true;
 }
 
@@ -223,4 +281,3 @@ void respawn_player() {
     
     save_game();
 }
-#endif
