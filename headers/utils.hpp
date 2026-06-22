@@ -1,6 +1,4 @@
-
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
 
 #include <iostream>
 #include <string>
@@ -28,6 +26,3 @@ inline void clear_screen() {
 }
 
 bool start_battle(Monster enemy);
-
-#endif // UTILS_HPP
-
