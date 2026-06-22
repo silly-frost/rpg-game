@@ -5,18 +5,26 @@ project(rpg_game LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+# Обновленный блок SOURCES в вашем CMakeLists.txt
 set(SOURCES 
     src/main.cpp
     src/map.cpp
     src/player.cpp
+    src/battle.cpp      
+    src/npc.cpp       
+    src/story_mira.cpp 
 )
+
 
 set(HEADERS 
     headers/json.hpp
     headers/map.hpp
-    headers/npc_data.hpp
     headers/player.hpp
     headers/utils.hpp
+    headers/battle.hpp      
+    headers/npc.hpp        
+    headers/story_mira.hpp  
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
