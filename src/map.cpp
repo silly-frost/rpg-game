@@ -66,11 +66,16 @@ bool load_map_from_file(const std::string& filename) {
     return true;
 }
 
+
 void map_time(){
     std::time_t now = std::time(nullptr);
-
     std::tm local_time;
-    localtime_r(&now, &local_time);
+
+#ifdef _WIN32
+    localtime_s(&local_time, &now); 
+#else
+    localtime_r(&now, &local_time); 
+#endif
 
     char buffer[80];
     std::strftime(buffer, sizeof(buffer), "%H:%M", &local_time);
