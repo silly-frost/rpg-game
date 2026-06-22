@@ -13,10 +13,10 @@ bool start_battle(Monster enemy) {
     std::cout << "========================================\n";
 
     while (player.is_alive() && enemy.health > 0) {
-        std::cout << "\nВаше HP: " << player.health << "/" << player.max_health << " | Защита: " << player.armor << "\n";
+        std::cout << "\nВаше HP: " << player.health << "/" << player.max_health << " | Защита: " << player.get_armor() << "\n";        
         std::cout << "HP врага " << enemy.name << " : " << enemy.health << "\n\n";
         std::cout << "Что вы будете делать?\n\n";
-        std::cout << "1. Атаковать оружием [" << player.weapon_name << "]\n";
+        std::cout << "1. Атаковать оружием [" << (player.equipped_weapon == "NONE" ? "Кулаки" : player.equipped_weapon) << "]\n";        
         std::cout << "2. Использовать лечащий предмет из сумки\n";
         std::cout << "3. Попытаться сбежать (Шанс 50%)\n\n"; 
         std::cout << "Выбор: ";
@@ -25,12 +25,13 @@ bool start_battle(Monster enemy) {
         clear_screen();
         bool turn_passed = false;
 
+        
         if (action == 1) {
-            int final_damage = player.damage;
+            int final_damage = player.get_damage(); 
 
             // Защита от ваншота для Малакара
             if (enemy.name.find("Малакар") != std::string::npos) {
-                if (player.damage > 90) {
+                if (player.get_damage() > 90) {
                     final_damage = 0; 
                     std::cout << "\n[Малакар]: Ха-ха-ха! Ты думал, что твоя фальшивая сила пробьет живую сталь?!\n";
                     std::cout << "[!] Магический щит Малакара заблокировал энергию вашего читерского удара!\n";
@@ -39,7 +40,7 @@ bool start_battle(Monster enemy) {
             }
 
             enemy.health -= final_damage;
-            std::cout << "\n Вы бьете врага оружием [" << player.weapon_name << "] и наносите " << final_damage << " урона!\n";
+            std::cout << "\n Вы бьете врага оружием [" << (player.equipped_weapon == "NONE" ? "Кулаки" : player.equipped_weapon) << "] и наносите " << final_damage << " урона!\n";
             
             if (enemy.health <= 0) break;
             turn_passed = true; 
@@ -84,10 +85,13 @@ bool start_battle(Monster enemy) {
             }
 
             if (chosen_potion == "Таинственное_Зелье") {
-                player.health += 60;
-                player.damage += 10;
-                std::cout << "\n[+] В спешке боя вы выпиваете Таинственное зелье, восстанавливаете 60 HP и получаете силу!\n";
-            } 
+                player.health += 70;
+                if(player.base_damage == 20) std::cout << "\n[+] В спешке боя вы выпиваете Таинственное зелье, восстанавливая 70 HP!\n";
+                else {
+                    player.base_damage += 10;
+                    std::cout << "\n[+] В спешке боя вы выпиваете Таинственное зелье, восстанавливаете 70 HP и увеличиваете свой урон на 10!\n";
+                }
+            }
             else if (chosen_potion == "Пиво") {
                 player.health += 20;
                 std::cout << "\n[+] Торопясь, вы выпиваете Пиво и восстанавливаете 20 HP!\n";
@@ -136,13 +140,14 @@ bool start_battle(Monster enemy) {
 
         // Ход монстра (срабатывает, если игрок атаковал, выпил зелье или провалил побег)
         if (turn_passed) {
-            int enemy_strike = enemy.damage - player.armor;
+            int enemy_strike = enemy.damage - player.get_armor(); 
             int min_damage = 15;
             
             if (enemy.name.find("Главарь") != std::string::npos || enemy.name.find("Малакар") != std::string::npos) {
                 min_damage = enemy.damage * 70 / 100; 
             }
             
+            if (min_damage < 0) min_damage = 0;
             if (enemy_strike < min_damage) enemy_strike = min_damage;
             
             player.health -= enemy_strike;
