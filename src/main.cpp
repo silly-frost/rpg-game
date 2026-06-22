@@ -1,7 +1,7 @@
 #include"utils.hpp"
-#include"../headers/player.hpp"    
-#include"../headers/map.hpp"       
-#include"../headers/npc_data.hpp" 
+#include"player.hpp"    
+#include"map.hpp"       
+#include"npc.hpp" 
 #include<iostream>
 #include<string>
 
