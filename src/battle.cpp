@@ -31,7 +31,7 @@ bool start_battle(Monster enemy) {
 
             // Защита от ваншота для Малакара
             if (enemy.name.find("Малакар") != std::string::npos) {
-                if (player.get_damage() > 90) {
+                if (player.get_damage() > 150) {
                     final_damage = 0; 
                     std::cout << "\n[Малакар]: Ха-ха-ха! Ты думал, что твоя фальшивая сила пробьет живую сталь?!\n";
                     std::cout << "[!] Магический щит Малакара заблокировал энергию вашего читерского удара!\n";
@@ -86,7 +86,7 @@ bool start_battle(Monster enemy) {
 
             if (chosen_potion == "Таинственное_Зелье") {
                 player.health += 70;
-                if(player.base_damage == 20) std::cout << "\n[+] В спешке боя вы выпиваете Таинственное зелье, восстанавливая 70 HP!\n";
+                if(player.base_damage > 20) std::cout << "\n[+] В спешке боя вы выпиваете Таинственное зелье, восстанавливая 70 HP!\n";
                 else {
                     player.base_damage += 10;
                     std::cout << "\n[+] В спешке боя вы выпиваете Таинственное зелье, восстанавливаете 70 HP и увеличиваете свой урон на 10!\n";

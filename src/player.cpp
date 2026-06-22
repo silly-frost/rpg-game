@@ -72,7 +72,6 @@ void show_player_status() {
 
         if (player.inventory.empty()) {
             extern void wait_for_player();
-            wait_for_player();
             break;
         }
 
