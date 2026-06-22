@@ -37,6 +37,12 @@ void talk_to_olden() {
 }
 
 void talk_to_harry() {
+    if (player.has_flag("learned_magic")) {
+        std::cout << "\n[Гарри]: Боги мои! Парень, да от тебя так и веет звездным сиянием! \n[Гарри]: Вся таверна только и говорит о том, как ты обуздал магию Посоха Света и зачистил Чёрные Скалы. \n[Гарри]: Настоящая легенда! Пей, сколько влезет, за счет заведения!\n";
+        wait_for_player();
+        return;
+    }
+
     if (player.has_flag("world_saved")) {
             std::cout << "\n[Гарри]: А вот и наш герой! " << player.name << ", за счет заведения! Сегодня вся таверна пьет за твое здоровье. \n[Гарри]: Ты уничтожил заразу на севере, парень, мы свободны!\n";
             player.inventory.push_back("Королевское_вино");
@@ -80,6 +86,181 @@ void talk_to_harry() {
 
 }
 
+void talk_to_aurelius() {
+    if (!player.has_flag("game_completed")) {
+        std::cout << "\nДверь обсерватории запечатана мощным магическим барьером. \nСюда невозможно войти.\n";
+        wait_for_player();
+        return;
+    }
+
+    if (player.has_flag("learned_magic")) {
+        std::cout << "\n[Аурелиус]: Приветствую тебя, мой лучший ученик. \n[Аурелиус]: Посох Света в твоих руках сияет чистой космической энергией.\n";
+        wait_for_player();
+        return;
+    }
+
+    // Если квест уже взят, проверяем наличие Астральной призмы в инвентаре
+    if (player.has_flag("aurelius_quest_started")) {
+        bool has_prism = false;
+        size_t prism_idx = 0;
+        for (size_t i = 0; i < player.inventory.size(); ++i) {
+            if (player.inventory[i] == "Астральная_призма") { has_prism = true; prism_idx = i; break; }
+        }
+
+        if (has_prism) {
+            std::cout << "\n[Аурелиус]: Боги... Ты действительно добыл Астральную призму с Острова Чёрных Скал! \n[Аурелиус]: Теперь у нас есть всё необходимое.\n\n";
+            std::cout << "1. [Квест] Отдать Астральную призму Аурелиусу и начать обучение\n2. Назад\nВыбор: ";
+            int q; std::cin >> q; std::cin.ignore(1, '\n');
+            clear_screen();
+
+            if (q == 1) {
+                player.inventory.erase(player.inventory.begin() + prism_idx);
+                player.story_flags.push_back("learned_magic");
+                
+                std::cout << "[Чародей Аурелиус устанавливает призму в центр зала. Потоки звездного света преломляются и устремляются прямо в ваше чело. Руны на Посохе Света ярко вспыхивают лазурным огнем!]\n\n";
+                std::cout << "[Аурелиус]: Отныне ты познал тайны чистой магии. \n[Аурелиус]: Открой меню состояния и вооружись Посохом Света!\n";
+                
+                extern void save_game();
+                save_game();
+            }
+            wait_for_player();
+            return;
+        } else {
+            std::cout << "\n[Аурелиус]: Ты ещё не вернулся с Острова Чёрных Скал? \n[Аурелиус]: Без Астральной призмы я не смогу сфокусировать энергию звезд и обучить тебя магии. Поторопись, путник. Шхуна ждёт тебя в порту.\n";
+            wait_for_player();
+            return;
+        }
+    }
+
+    std::cout << "\nВы входите под купол башни. Старец в лазурной мантии отрывается от чтения огромного фолианта.\n\n";
+    std::cout << "[Аурелиус]: Я ждал тебя, путник. Малакар пал, и барьер рухнул. Я был его соратником, пока он не сошел с ума от живого металла...\n";
+    std::cout << "[Аурелиус]: Я вижу, Лотар очистил его посох. Но без знаний магии этот артефакт бесполезен. Я бы с радостью обучил тебя, но Малакар похитил Астральную призму нашего ордена.\n";
+
+    bool has_light_staff = false;
+    for (const auto& item : player.inventory) {
+        if (item == "Посох_Света") { has_light_staff = true; break; }
+    }
+
+    if (has_light_staff) {
+        std::cout << "\n[Аурелиус]: Малакар спрятал призму у своего верного соратника — Капитана Королевской Стражи. После заражения капитан мутировал, и его шхуну выбросило на Остров Чёрных Скал. \n[Аурелиус]: Добудешь призму — я обучу тебя магии.\n\n";
+        std::cout << "1. [Квест] Я согласен. Я отправлюсь на Остров Чёрных Скал.\n2. Это слишком опасно\nВыбор: ";
+        int q; std::cin >> q; std::cin.ignore(1, '\n');
+        clear_screen();
+
+        if (q == 1) {
+            player.story_flags.push_back("aurelius_quest_started");
+            std::cout << "\n[Аурелиус]: Отлично. Ступай в Заснеженный порт к Бригадиру доков. Я передам ему весть, чтобы он подготовил для тебя шхуну. Будь осторожен, Мутировавший Капитан невероятно силен.\n";
+            extern void save_game();
+            save_game();
+        }
+    } else {
+        std::cout << "\n[Аурелиус]: Возвращайся, когда рыцарь Лотар в Забытом бастионе очистит Посох Малакара от скверны. \n[Аурелиус]: Я не смогу выдать тебе задание без подходящего проводника энергии.\n";
+    }
+    wait_for_player();
+}
+// --- Призрак рыцаря Лотара (Забытый бастион) ---
+void talk_to_lothar() {
+    if (!player.has_flag("game_completed")) {
+        std::cout << "\nПеред вами стоит полупрозрачная фигура в древних латах. \nПризрак грозно сжимает рукоять меча и безмолвно смотрит на вас. Он не желает говорить со слабыми.\n";
+        wait_for_player();
+        return;
+    }
+
+    if (player.has_flag("weapon_purified")) {
+        std::cout << "\n[Лотар]: Мой долг исполнен, путник. \n[Лотар]: Если руны Посоха Света все еще молчат — поднись по лестнице в Древнюю обсерваторию. \n[Лотар]: Там укрылся чародей Аурелиус, он укажет тебе путь к знаниям.\n";
+        wait_for_player();
+        return;
+    }
+
+    std::cout << "\n[Лотар]: Я чувствую... Ядро Малакара уничтожено. Твой подвиг освободил мою душу от вечного дозора. \n[Лотар]: Но я вижу в твоей сумке Его осквернённое оружие. Не позволяй этой ржавчине поглотить тебя.\n\n";
+    
+    bool has_staff = false;
+    size_t staff_idx = 0;
+    for (size_t i = 0; i < player.inventory.size(); ++i) {
+        if (player.inventory[i] == "Осквернённый_посох") { has_staff = true; staff_idx = i; break; }
+    }
+
+    if (has_staff) {
+        std::cout << "1. [Квест] Отдать Осквернённый посох Лотару для очищения\n";
+        std::cout << "2. Оставить посох себе\nВыбор: ";
+        int q; std::cin >> q; std::cin.ignore(1, '\n');
+        clear_screen();
+
+        if (q == 1) {
+            player.inventory.erase(player.inventory.begin() + staff_idx);
+            player.story_flags.push_back("weapon_purified");
+            player.inventory.push_back("Посох_Света"); 
+
+            std::cout << "[Призрак Лотар воздевает руки к небу. Вспышка ослепительного белого пламени сжигает ржавчину с посоха]\n\n";
+            std::cout << "[Лотар]: Тьма отступила. Возьми этот Искрящийся посох Света. \n[Лотар]: Теперь иди наверх, к Аурелиусу, чтобы он обучил тебя управлять этой силой.\n";
+            
+            extern void save_game();
+            save_game();
+        }
+    } else {
+        std::cout << "[Лотар]: Ты одолел мага, но где же его посох? Принеси его мне, и я очищу этот металл от скверны.\n";
+    }
+    wait_for_player();
+}
+
+// --- Кочующий торговец Бахир (Степи) ---
+void talk_to_bahir() {
+    std::cout << "\n[Бахир]: Приветствую, путник! Мой караван держит путь через эти степи. \n[Бахир]: У меня есть отличные припасы со всего материка! Смотри:\n\n";
+    std::cout << "1. Таинственное Зелье (Цена: 100 золотых) -> Навсегда увеличит базовый урон на 10 и восстановит 70 HP\n";
+    std::cout << "2. Крепкий Эль гномов (Цена: 50 золотых) -> Восстановит 50 HP\n";
+    std::cout << "3. Уйти\n\nВыбор: ";
+    int q; std::cin >> q; std::cin.ignore(1, '\n');
+    clear_screen();
+
+    if (q == 1 && player.gold >= 100) {
+        player.gold -= 100;
+        player.inventory.push_back("Таинственное_Зелье");
+        std::cout << "[Бахир]: Мудрый выбор! Это зелье наделит тебя невиданной силой.\n";
+    }
+    else if (q == 2 && player.gold >= 50) {
+        player.gold -= 50;
+        player.inventory.push_back("Крепкий_Эль");
+        std::cout << "[Бахир]: Отличный эль, обжигает как надо!\n";
+    }
+    else if (q == 1 || q == 2) {
+        std::cout << "[Бахир]: Хех, парень, для такой покупки нужно больше золота.\n";
+    }
+    wait_for_player();
+}
+
+// --- Охота на Болотного Монстра (Гнилая топь) ---
+void hunt_in_swamp() {
+    if (!player.has_flag("game_completed")) {
+        std::cout << "\nЗеленый туман топи слишком ядовит. Сюда опасно заходить без веской причины.\n";
+        wait_for_player();
+        return;
+    }
+
+    if (player.has_flag("swamp_boss_killed")) {
+        std::cout << "\nГнилая топь затихла. Огромная туша Реликтового Слизня медленно растворяется в болотной воде.\n";
+        wait_for_player();
+        return;
+    }
+
+    std::cout << "\nВы ступаете на зыбкую почву болот. Вдруг трясина взрывается фонтаном грязи! \nИз глубин поднимается пульсирующий Реликтовый Слизень, привлеченный энергией поверженного Малакара!\n\n";
+    std::cout << "1. [БИТВА] Обнажить оружие и принять бой!\n";
+    std::cout << "2. Трусливо отступить обратно в Степи\nВыбор: ";
+    int q; std::cin >> q; std::cin.ignore(1, '\n');
+    clear_screen();
+
+    if (q == 1) {
+        Monster swamp_boss = {"Реликтовый Слизень", 800, 35, 600};
+        extern bool start_battle(Monster enemy);
+        if (start_battle(swamp_boss)) {
+            player.story_flags.push_back("swamp_boss_killed");
+            std::cout << "\n[Победа!] Вы сокрушили ужас болот! В его останках вы нашли 600 золотых монет!\n";
+            extern void save_game();
+            save_game();
+        }
+    }
+    wait_for_player();
+}
+
 void talk_to_grom() {
     if (player.has_flag("world_saved")) {
             std::cout << "\n[Гром]: Ха! Мое оружие побывало в руках спасителя мира! \n[Гром]: Для меня это высшая честь, путник. Металл больше не пожирает людей, и в этом твоя заслуга.\n";
@@ -105,13 +286,44 @@ void talk_to_grom() {
         int q; std::cin >> q; std::cin.ignore(1, '\n');
 
         clear_screen();
-        if (q == 1 && player.gold >= 25) { player.gold -= 25; player.damage = 25; player.weapon_name = "Охотничий_нож"; player.inventory.push_back("Охотничий_нож"); std::cout << "Вы вооружились Охотничьим ножом!\n"; }
-        else if (q == 2 && player.gold >= 60) { player.gold -= 60; player.damage = 40; player.weapon_name = "Стальной_меч"; player.inventory.push_back("Стальной_меч"); std::cout << "Вы вооружились Стальным мечом!\n"; } 
-        else if (q == 3 && player.gold >= 150) { player.gold -= 150; player.damage = 60; player.weapon_name = "Тяжелая_секира"; player.inventory.push_back("Тяжелая_секира"); std::cout << "Вы вооружились Тяжелой секирой!\n"; }
-        else if (q == 4 && player.gold >= 300) { player.gold -= 300; player.damage = 80; player.weapon_name = "Священный_молот"; player.inventory.push_back("Священный_молот"); std::cout << "Вы получили силу Святого молота!\n"; }
-        else if (q == 5 && player.gold >= 50) { player.gold -= 50; player.armor = 2; player.inventory.push_back("Кожаный_доспех"); std::cout << "Вы надели Кожаный доспех!\n"; }
-        else if (q == 6 && player.gold >= 120) { player.gold -= 120; player.armor = 5; player.inventory.push_back("Стальная_кираса"); std::cout << "Вы надели Стальную кирасу!\n"; }
-        else if (q == 7 && player.gold >= 200) { player.gold -= 200; player.armor = 10; player.inventory.push_back("Сверкающий_доспех"); std::cout << "Вы надели Сверкающий доспех!\n"; }
+
+        // Покупка орижя 
+        if (q == 1 && player.gold >= 25) { 
+            player.gold -= 25; 
+            player.inventory.push_back("Охотничий_нож"); 
+            std::cout << "[Гром]: Отличный выбор. Охотничий нож добавлен в твой инвентарь! Надень его через меню состояния.\n"; 
+        }
+        else if (q == 2 && player.gold >= 60) { 
+            player.gold -= 60; 
+            player.inventory.push_back("Стальной_меч"); 
+            std::cout << "[Гром]: Хорошая сталь. Стальной длинный меч отправлен в твою сумку!\n"; 
+        }
+        else if (q == 3 && player.gold >= 150) { 
+            player.gold -= 150; 
+            player.inventory.push_back("Тяжелая_секира"); 
+            std::cout << "[Гром]: Будь аккуратнее с этим топором, он у тебя в инвентаре.\n"; 
+        }
+        else if (q == 4 && player.gold >= 300) { 
+            player.gold -= 300; 
+            player.inventory.push_back("Священный_молот"); 
+            std::cout << "[Гром]: Святой молот теперь твой. Ищи его в своей сумке!\n"; 
+        }
+        // Покупка брони (аналогична покупке оружия)
+        else if (q == 5 && player.gold >= 50) { 
+            player.gold -= 50; 
+            player.inventory.push_back("Кожаный_доспех"); 
+            std::cout << "[Гром]: Кожаная защита теперь у тебя в сумке. Примеришь на досуге.\n"; 
+        }
+        else if (q == 6 && player.gold >= 120) { 
+            player.gold -= 120; 
+            player.inventory.push_back("Стальная_кираса"); 
+            std::cout << "[Гром]: Надежный доспех добавлен в твою сумку!\n"; 
+        }
+        else if (q == 7 && player.gold >= 200) { 
+            player.gold -= 200; 
+            player.inventory.push_back("Сверкающий_доспех"); 
+            std::cout << "[Гром]: Настоящее произведение искусства отправлено в твой инвентарь!\n"; 
+        }
         else if (q == 8) {
             if (!player.inventory.empty()) {
                 std::string item = player.inventory.back();
@@ -147,49 +359,79 @@ void talk_to_gray(){
 }
 
 // бригадир
-void talk_to_foreman(){ 
-    if (player.has_flag("world_saved")) {
-            std::cout << "\n[Бригадир]: А, это ты, спаситель! Глазам своим не верю — море наконец-то очистилось!\n";
-            std::cout << "[Бригадир]: Парни сегодня привезли полный трюм чистой, нормальной трески. Никакой стальной чешуи и гвоздей вместо зубов! \n[Бригадир]: Ты вернул жизнь нашему порту, путник. Спасибо тебе от всех рыбаков материка!\n";
-            std::cout << "[Бригадир]: Хочешь подзаработать на разгрузке нормального улова?\n";
-            std::cout << "1. [Работа] Разгрузить свежую рыбу (Займет 4 секунды | +15 золотых)\n";
-            std::cout << "2. Назад\nВыбор: ";
-            int q; std::cin >> q; std::cin.ignore(1, '\n');
-            clear_screen();
-            
-            if (q == 1) {
-                std::cout << "Вы весело разгружаете ящики со свежей рыбой"; std::cout << std::flush;
-                for(int i=0; i<4; ++i) { std::this_thread::sleep_for(std::chrono::seconds(1)); std::cout << " ." << std::flush; }
-                clear_screen();
-                player.gold += 15;
-                std::cout << "\n[Бригадир]: Отличная работа, держи свои 15 золотых монеток!\n";
-            }
-            wait_for_player();
-            return;
+void talk_to_foreman() {
+    // ПОСЛЕ ПОБЕДЫ НАД МАЛАКАРОМ
+    if (player.has_flag("game_completed")) {
+        std::cout << "\n[Бригадир]: А, это ты, спаситель! Глазам своим не верю — море наконец-то очистилось!\n";
+        std::cout << "[Бригадир]: Парни сегодня привезли полный трюм чистой, нормальной трески. \n[Бригадир]: Ты вернул жизнь нашему порту, путник. Спасибо тебе от всех рыбаков материка!\n\n";
+        std::cout << "Что ты хочешь сделать?\n\n";
+        std::cout << "1. [Работа] Разгрузить свежую рыбу (Займет 4 секунды | +15 золотых)\n";
+        if(player.has_flag("world_saved")){
+            std::cout << "2. [Корабль] Отплыть на Очищенный остров\n";
+        }
+        else{
+            std::cout << "2. [Корабль] Отплыть на Проклятый остров\n";
         }
 
-        std::cout << "\n[Бригадир]: Эй, крепкие руки везде пригодятся! Надо разгрузить корабль с вяленой рыбой. \n[Бригадир]: Платят честно. Или ты просто поболтать пришёл?\n";
-        std::cout << "1. [Работа] Таскать тяжелые бочки (Займет 4 секунды | +10 золотых)\n";
-        std::cout << "2. Что за слухи ходят о море и рыболовстве в последнее время?\n";
-        std::cout << "3. Назад\nВыбор: ";
+        if (player.has_flag("aurelius_quest_started")) {
+            std::cout << "3. [Квест] Отплыть на Остров Забытых Скал\n";
+        }
+        std::cout << "4. Назад\n\nВыбор: ";
         int q; std::cin >> q; std::cin.ignore(1, '\n');
         clear_screen();
-
+        
         if (q == 1) {
-            std::cout << "Вы надрываетесь, перетаскивая бочки"; std::cout << std::flush;
-            for(int i=0; i<4; ++i) { std::this_thread::sleep_for(std::chrono::seconds(1)); std::cout << " ." << std::flush; }
+            std::cout << "Вы весело разгружаете ящики со свежей рыбой"; std::cout << std::flush;
+            for(int i = 0; i < 4; ++i) { std::this_thread::sleep_for(std::chrono::seconds(1)); std::cout << " ." << std::flush; }
             clear_screen();
-            player.gold += 10;
-            std::cout << "\n[Бригадир]: Хорошо поработал, держи заслуженные 10 золотых монет!\n";
-        } else if (q == 2) {
-            std::cout << "\n[Бригадир]: Плохи дела, парень. \n[Бригадир]: Парни из последней шхуны клянутся богами, что выловили сельдь, у которой чешуя была из настоящей стальной крошки, а зубы — как гвозди! \n[Бригадир]: Она порвала им все сети и искусала матроса за палец. Море чернеет, зараза с Железного острова расползается по воде. \n[Бригадир]: Скоро рыбачить станет смертельно опасно.\n";
+            player.gold += 15;
+            std::cout << "\n[Бригадир]: Отличная работа, держи свои 15 золотых монеток!\n";
+        }
+        else if (q == 2) {
+            if(player.has_flag("world_saved")){
+                std::cout << "\n[Бригадир]: На Очищенный остров? Отличный выбор! Багровый туман рассеялся, доплывем с ветерком. \n[Бригадир]: Шхуна доставит тебя к берегу.\n";
+                std::cout << "\n[Система] Используйте карту мира, чтобы выбрать Очищенный остров и отправиться в путь.\n";
+            }
+            else {
+                std::cout << "\n[Бригадир]: На Проклятый остров? Ты же расправился с Малакаром, зачем плыть туда снова? \n[Бригадир]: А знаешь, дело твоё. \n";
+                std::cout << "\n[Система] Используйте карту мира, чтобы выбрать Проклятый остров и отправиться в путь. \n";
+            }
+        }
+        else if (q == 3 && player.has_flag("aurelius_quest_started")) {
+            std::cout << "\n[Бригадир]: На Остров Забытых Скал? Чародей Аурелиус предупреждал меня. \n[Бригадир]: Моя шхуна готова. Возвращайся к карте мира, выбирай Остров Забытых Скал и забирай Призму!\n";
         }
         wait_for_player();
+        return;
+    }
+
+    // === ДО ПОБЕДЫ НАД МАЛАКАРОМ ===
+    std::cout << "\n[Бригадир]: Эй, крепкие руки везде пригодятся! Надо разгрузить корабль с вяленой рыбой. \n[Бригадир]: Платят честно. Или ты просто поболтать пришёл?\n\n";
+    std::cout << "1. [Работа] Таскать тяжелые бочки (Займет 4 секунды | +10 золотых)\n";
+    std::cout << "2. Что за слухи ходят о море и рыболовстве в последнее время?\n";
+    std::cout << "3. [Корабль] Отплыть на Проклятый остров (К Проклятому замку)\n";
+    std::cout << "4. Назад\n\nВыбор: ";
+    int q; std::cin >> q; std::cin.ignore(1, '\n');
+    clear_screen();
+
+    if (q == 1) {
+        std::cout << "Вы надрываются, перетаскивая бочки"; std::cout << std::flush;
+        for(int i = 0; i < 4; ++i) { std::this_thread::sleep_for(std::chrono::seconds(1)); std::cout << " ." << std::flush; }
+        clear_screen();
+        player.gold += 10;
+        std::cout << "\n[Бригадир]: Хорошо поработал, держи заслуженные 10 золотых монет!\n";
+    } 
+    else if (q == 2) {
+        std::cout << "\n[Бригадир]: Плохи дела, парень. Рыба покрывается стальной чешуей. Море чернеет, зараза расползается.\n";
+    }
+    else if (q == 3) {
+        std::cout << "\n[Бригадир]: На Проклятый остров к безумному магу?! Ты ищешь смерти, парень... \n[Бригадир]: Ладно, уговор есть уговор, шхуна доставит тебя к берегу Проклятого острова. Возвращайся к карте мира и отправляйся. Храни тебя небо!\n";
+    }
+    wait_for_player();
 }
 
 void talk_to_shaman(){
     std::cout << "\n[Раду]: Рад видеть живую душу в Тёмном лесу.\n";
-      std::cout << "[Раду]: Что тебе нужно?\n1. Вылечиться полностью (Цена: 80 золотых)\n2. Купить таинственное зелье (+50 HP и +10 к урону) (Цена: 100 золотых)\n3. Уйти\nВыбор: ";
+      std::cout << "[Раду]: Что тебе нужно?\n1. Вылечиться полностью (Цена: 80 золотых)\n2. Купить таинственное зелье (+70 HP и +10 к урону) (Цена: 100 золотых)\n3. Уйти\nВыбор: ";
       int q; std::cin >> q; 
       std::cin.ignore(1, '\n');
       clear_screen();
@@ -258,6 +500,13 @@ void talk_to_bernard(){
 }
 
 void talk_to_desert_king(){
+
+    if (player.has_flag("learned_magic")) {
+        std::cout << "\n[Король Эдриан]: Великий чародей... Твоя сила превосходит все легионы моей стражи. \n[Король Эдриан]: Безымянное королевство навеки обязано тебе за очищение Острова Чёрных Скал. Склоняю голову перед твоей мудростью.\n";
+        wait_for_player();
+        return;
+    }
+
     if (player.has_flag("world_saved")) {
             std::cout << "\n[Король Эдриан]: Приветствую тебя, легендарный герой. От лица всего Безымянного королевства я склоняю голову. \n[Король Эдриан]: Ты остановил апокалипсис. Теперь наши стены станут символом новой, безопасной эпохи.\n";
             wait_for_player();
@@ -305,6 +554,12 @@ void talk_to_karim(){
     wait_for_player();    
 }
 void talk_to_jafar(){
+    
+    if (player.has_flag("learned_magic")) {
+        std::cout << "\n[Джафар]: К-колдун?! Отойди от меня, парень, я шутить со звездным пламенем не нанимался. \n[Джафар]: ТЫ силён. Уважаю. Если нужно сбыть королевские караваны — я всегда к твоим услугам.\n";
+        wait_for_player();
+        return;
+    }
     // Состояние 1: Квест выполнен  
       if (player.has_flag("jafar_quest_finished")) {
             if (player.has_flag("jafar_raid_complete")) {
@@ -545,12 +800,52 @@ void bossfight_malakar() {
     }
 }
 
+void explore_black_rocks() {
+    if (!player.has_flag("aurelius_quest_started")) {
+        std::cout << "\nМрачные Чёрные Скалы уходят в грозовое небо. Здесь безлюдно и опасно, вам незачем здесь находиться.\n";
+        wait_for_player();
+        return;
+    }
+
+    if (player.has_flag("prism_obtained")) {
+        std::cout << "\nОстров Чёрных Скал затих. На камнях лежит груда разбитых железных лат побежденного Капитана.\n";
+        wait_for_player();
+        return;
+    }
+
+    std::cout << "\nВы пробираетесь сквозь острые черные утесы. Из грозовой тьмы раздается тяжелый скрежет металла по камню! \nПеред вами вырастает исполинская фигура в разорванном королевском плаще. Его тело срослось со стальным щитом, а вместо правой руки пульсирует огромный ржавый клинок!\n\n";
+    std::cout << "[!] Это Мутировавший Капитан Стражи! Он издает яростный рев и бросается на вас!\n\n";
+    std::cout << "1. [БИТВА] Обнажить оружие и принять бой за Астральную призму!\n";
+    std::cout << "2. Отступить назад к кораблю\nВыбор: ";
+    int q; std::cin >> q; std::cin.ignore(1, '\n');
+    clear_screen();
+
+    if (q == 1) {
+        Monster mutated_captain = {"Мутировавший Капитан", 1000, 50, 300};
+        extern bool start_battle(Monster enemy);
+        if (start_battle(mutated_captain)) {
+            player.story_flags.push_back("prism_obtained");
+            player.inventory.push_back("Астральная_призма");
+            std::cout << "\n====================================================================\n";
+            std::cout << " [ПОБЕДА] Тяжелая туша чудовища падает на скалы, рассыпаясь в ржавую пыль.\n";
+            std::cout << " Среди обломков его лат вы находите сияющий лазурный кристалл — \n";
+            std::cout << " Астральную призму Чародея Аурелиуса!\n";
+            std::cout << "====================================================================\n";
+            std::cout << "[+] В ваш инвентарь добавлена Астральная призма. Везите её Аурелиусу!\n";
+            extern void save_game();
+            save_game();
+        }
+    }
+    wait_for_player();
+}
+
 // Главная функция-менеджер
 
 void interact_with_npcs() {
     std::vector<std::string> local_npcs;    
     std::string current_id = world_map.at(current_location).id;
 
+    // Сбор доступных NPC на текущей локации по ID из JSON
     if (current_id == "home") {
         local_npcs.push_back("Гид Олден");
     }
@@ -563,23 +858,17 @@ void interact_with_npcs() {
         local_npcs.push_back("Странник Илай");
     }
     else if (current_id == "snow_village") {
-        if (player.has_flag("talked_to_stranger")) {
-            local_npcs.push_back("Однорукий старик Бернард");
-        }
+        if (player.has_flag("talked_to_stranger")) local_npcs.push_back("Однорукий старик Бернард");
         local_npcs.push_back("Алхимик Мира");
     }
     else if (current_id == "unnamed_kingdom") {
         local_npcs.push_back("Король Эдриан");
         local_npcs.push_back("Стражник Томас");
-        if (player.has_flag("talked_to_guard")) {
-            local_npcs.push_back("Оружейник Гром");
-        }
+        if (player.has_flag("talked_to_guard")) local_npcs.push_back("Оружейник Гром");
     }
     else if (current_id == "desert_village") {
         local_npcs.push_back("Изгнанник Карим");
-        if (player.has_flag("talked_to_citizen")) {
-            local_npcs.push_back("Разбойник Джафар");
-        }
+        if (player.has_flag("talked_to_citizen")) local_npcs.push_back("Разбойник Джафар");
     }
     else if (current_id == "tavern") {
         local_npcs.push_back("Трактирщик Гарри (Бар)");
@@ -594,77 +883,57 @@ void interact_with_npcs() {
     else if (current_id == "iron_island") {
         local_npcs.push_back("Кристалл живого металла (Добыча)");
     }
-
-    // Если в локации никого нет
+    else if (current_id == "sunny_steppes") {
+        local_npcs.push_back("Кочующий торговец Бахир");
+    }
+    else if (current_id == "forgotten_bastion") {
+        local_npcs.push_back("Призрак рыцаря Лотара");
+    }
+    else if (current_id == "ancient_observatory") {
+        local_npcs.push_back("Чародей Аурелиус");
+    }
+    else if (current_id == "black_rocks_island") {
+        local_npcs.push_back("Мутировавший Капитан Стражи (БОСС)");
+    }
+    else if (current_id == "rotten_swamp") {
+        local_npcs.push_back("Реликтовый Слизень (БОСС)");
+    }
     if (local_npcs.empty()) {
         std::cout << "\nВ этой локации сейчас никого нет.\n";
         wait_for_player();
         return;
     }
 
-    // Вывод меню выбора NPC
     std::cout << "\nПеред вами люди и существа. С кем вы хотите заговорить?\n";
-    for (size_t i = 0; i < local_npcs.size(); ++i) {
-        std::cout << i + 1 << ". " << local_npcs[i] << "\n";
-    }
+    for (size_t i = 0; i < local_npcs.size(); ++i) std::cout << i + 1 << ". " << local_npcs[i] << "\n";
     std::cout << "0. Назад\nВаш выбор: ";
     int npc_choice; std::cin >> npc_choice; std::cin.ignore(1, '\n');
 
     if (npc_choice <= 0 || npc_choice > (int)local_npcs.size()) return;
     std::string chosen_npc = local_npcs[npc_choice - 1];
-
     clear_screen();
 
-    if (chosen_npc == "Гид Олден") {
-        talk_to_olden();
-    }
-    else if (chosen_npc == "Трактирщик Гарри (Бар)") {
-        talk_to_harry();
-    }
-    else if (chosen_npc == "Оружейник Гром") {
-        talk_to_grom();
-    }
-    else if (chosen_npc == "Алхимик Мира") {
-        talk_to_mira();
-    }
-    else if (chosen_npc == "Старый Охотник Грей (Заработок)") {
-        talk_to_gray(); 
-    }
-    else if (chosen_npc == "Бригадир портовых доков (Заработок)") {
-        talk_to_foreman();
-    }
-    else if (chosen_npc == "Шаман Раду") { 
-        talk_to_shaman(); 
-    }
-    else if (chosen_npc == "Дух Лешего") {
-        talk_to_leshiy();
-    }
-    else if (chosen_npc == "Странник Илай") {
-        talk_to_ilay();
-    }
-    else if (chosen_npc == "Однорукий старик Бернард") {
-        talk_to_bernard();
-    }
-    else if (chosen_npc == "Король Эдриан") {
-        talk_to_desert_king();
-    }
-    else if (chosen_npc == "Стражник Томас") {
-        talk_to_guard(); 
-    }
-    else if (chosen_npc == "Изгнанник Карим") {
-        talk_to_karim();
-    }
-    else if (chosen_npc == "Разбойник Джафар") {
-        talk_to_jafar();
-    }
-    else if (chosen_npc == "Пьяная компания в углу") {
-        talk_to_drunkards(); 
-    }
-    else if (chosen_npc == "Кристалл живого металла (Добыча)") {
-        mine_crystall();
-    }
-    else if (chosen_npc == "Безумный маг Малакар (БОСС)") { 
-        bossfight_malakar();
-    }
+    if (chosen_npc == "Гид Олден")                          talk_to_olden();
+    else if (chosen_npc == "Трактирщик Гарри (Бар)")        talk_to_harry();
+    else if (chosen_npc == "Оружейник Гром")                talk_to_grom();
+    else if (chosen_npc == "Алхимик Мира")                  talk_to_mira();
+    else if (chosen_npc == "Старый Охотник Грей (Заработок)") talk_to_gray();
+    else if (chosen_npc == "Бригадир портовых доков (Заработок)") talk_to_foreman();
+    else if (chosen_npc == "Шаман Раду")                    talk_to_shaman();
+    else if (chosen_npc == "Дух Лешего")                    talk_to_leshiy();
+    else if (chosen_npc == "Странник Илай")                 talk_to_ilay();
+    else if (chosen_npc == "Однорукий старик Бернард")      talk_to_bernard();
+    else if (chosen_npc == "Король Эдриан")                 talk_to_desert_king();
+    else if (chosen_npc == "Стражник Томас")                talk_to_guard();
+    else if (chosen_npc == "Изгнанник Карим")               talk_to_karim();
+    else if (chosen_npc == "Разбойник Джафар")              talk_to_jafar();
+    else if (chosen_npc == "Пьяная компания в углу")        talk_to_drunkards();
+    else if (chosen_npc == "Кочующий торговец Бахир")        talk_to_bahir();
+    else if (chosen_npc == "Призрак рыцаря Лотара")          talk_to_lothar();
+    else if (chosen_npc == "Чародей Аурелиус")               talk_to_aurelius(); 
+    else if (chosen_npc == "Мутировавший Капитан Стражи (БОСС)") explore_black_rocks();
+    else if (chosen_npc == "Реликтовый Слизень (БОСС ТОПИ)") hunt_in_swamp();
+    else if (chosen_npc == "Кристалл живого металла (Добыча)") mine_crystall();
+    else if (chosen_npc == "Безумный маг Малакар (БОСС)")   bossfight_malakar();
 }
 
